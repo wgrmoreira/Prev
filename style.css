@@ -1,0 +1,207 @@
+/* Estilos para a aplicação PREV+ */
+
+:root {
+    --primary-color: #ffd700; /* Amarelo ouro */
+    --secondary-color: #ffffff; /* Branco */
+    --text-color: #333333;
+    --sugestao-color: #4caf50;
+    --manutencao-color: #2196f3;
+    --reclamacao-color: #f44336;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: var(--text-color);
+}
+
+.navbar {
+    background-color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: var(--text-color);
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.summary-card {
+    text-align: center;
+    border: none;
+}
+
+.summary-card .title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.summary-card .count {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.summary-card.sugestao {
+    background-color: rgba(76, 175, 80, 0.1);
+    border-left: 5px solid var(--sugestao-color);
+}
+
+.summary-card.manutencao {
+    background-color: rgba(33, 150, 243, 0.1);
+    border-left: 5px solid var(--manutencao-color);
+}
+
+.summary-card.reclamacao {
+    background-color: rgba(244, 67, 54, 0.1);
+    border-left: 5px solid var(--reclamacao-color);
+}
+
+.progress {
+    height: 10px;
+    border-radius: 5px;
+}
+
+.progress-bar {
+    background-color: var(--primary-color);
+}
+
+.nav-tabs .nav-link {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--text-color);
+    border-bottom: 3px solid var(--primary-color);
+}
+
+.pedido-card {
+    border-left: 5px solid #ddd;
+}
+
+.pedido-card.sugestao {
+    border-left-color: var(--sugestao-color);
+}
+
+.pedido-card.manutencao {
+    border-left-color: var(--manutencao-color);
+}
+
+.pedido-card.reclamacao {
+    border-left-color: var(--reclamacao-color);
+}
+
+.pedido-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.pedido-tipo {
+    font-weight: bold;
+}
+
+.pedido-tipo.sugestao {
+    color: var(--sugestao-color);
+}
+
+.pedido-tipo.manutencao {
+    color: var(--manutencao-color);
+}
+
+.pedido-tipo.reclamacao {
+    color: var(--reclamacao-color);
+}
+
+.pedido-data {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.pedido-descricao {
+    margin-bottom: 15px;
+}
+
+.pedido-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.pedido-solicitante {
+    font-weight: 500;
+}
+
+.pedido-local {
+    color: #666;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+.btn-primary:hover {
+    background-color: #e6c200;
+    border-color: #e6c200;
+    color: var(--text-color);
+}
+
+footer {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+/* Estilo para o botão de novo pedido em destaque */
+.novo-pedido-btn {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--text-color);
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    animation: pulse 2s infinite;
+}
+
+.novo-pedido-btn:hover {
+    background-color: #e6c200;
+    border-color: #e6c200;
+    color: var(--text-color);
+    animation: none;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .summary-card .count {
+        font-size: 2rem;
+    }
+}

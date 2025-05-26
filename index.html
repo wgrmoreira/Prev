@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PREV+ | Sistema de Pedidos do Condomínio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-building me-2"></i>
+                PREV+
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item" id="loginButton">
+                        <button class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <i class="fas fa-user-shield me-1"></i> Área do Administrador
+                        </button>
+                    </li>
+                    <li class="nav-item d-none" id="logoutButton">
+                        <button class="btn btn-outline-dark" id="btnLogout">
+                            <i class="fas fa-sign-out-alt me-1"></i> Sair
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Botão de Novo Pedido em Destaque -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <button class="btn btn-primary btn-lg w-100 novo-pedido-btn" id="btnNovoPedidoDestaque">
+                    <i class="fas fa-plus-circle me-2"></i> CRIAR NOVO PEDIDO
+                </button>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card summary-card sugestao">
+                    <div class="card-body">
+                        <div class="title">Sugestões</div>
+                        <div class="count" id="countSugestoes">0</div>
+                        <div>pedidos abertos</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card summary-card manutencao">
+                    <div class="card-body">
+                        <div class="title">Manutenções</div>
+                        <div class="count" id="countManutencoes">0</div>
+                        <div>pedidos abertos</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card summary-card reclamacao">
+                    <div class="card-body">
+                        <div class="title">Reclamações</div>
+                        <div class="count" id="countReclamacoes">0</div>
+                        <div>pedidos abertos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="mb-0">Progresso de Conclusão</h5>
+                    <span id="percentConcluidos">0%</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="abertos-tab" data-bs-toggle="tab" data-bs-target="#abertos" type="button" role="tab">
+                    <i class="fas fa-clipboard-list me-1"></i> Pedidos Abertos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="concluidos-tab" data-bs-toggle="tab" data-bs-target="#concluidos" type="button" role="tab">
+                    <i class="fas fa-check-circle me-1"></i> Pedidos Concluídos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="novo-tab" data-bs-toggle="tab" data-bs-target="#novo" type="button" role="tab">
+                    <i class="fas fa-plus-circle me-1"></i> Novo Pedido
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <!-- Pedidos Abertos -->
+            <div class="tab-pane fade show active" id="abertos" role="tabpanel">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="searchAbertos" placeholder="Buscar pedidos abertos...">
+                </div>
+                <div id="pedidosAbertosContainer">
+                    <!-- Pedidos abertos serão carregados aqui -->
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-2">Carregando pedidos...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pedidos Concluídos -->
+            <div class="tab-pane fade" id="concluidos" role="tabpanel">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="searchConcluidos" placeholder="Buscar pedidos concluídos...">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterTipo">
+                            <option value="">Todos os tipos</option>
+                            <option value="Sugestão">Sugestões</option>
+                            <option value="Manutenção">Manutenções</option>
+                            <option value="Reclamação">Reclamações</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterBloco">
+                            <option value="">Todos os blocos</option>
+                            <option value="1">Bloco 1</option>
+                            <option value="2">Bloco 2</option>
+                            <option value="3">Bloco 3</option>
+                            <option value="4">Bloco 4</option>
+                            <option value="5">Bloco 5</option>
+                            <option value="6">Bloco 6</option>
+                            <option value="7">Bloco 7</option>
+                            <option value="8">Bloco 8</option>
+                            <option value="9">Bloco 9</option>
+                            <option value="10">Bloco 10</option>
+                            <option value="11">Bloco 11</option>
+                            <option value="12">Bloco 12</option>
+                            <option value="13">Bloco 13</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="pedidosConcluidosContainer">
+                    <!-- Pedidos concluídos serão carregados aqui -->
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-2">Carregando pedidos...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Novo Pedido -->
+            <div class="tab-pane fade" id="novo" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Registrar Novo Pedido</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="formNovoPedido">
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label for="nome" class="form-label">Nome do Solicitante</label>
+                                    <input type="text" class="form-control" id="nome" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="bloco" class="form-label">Bloco</label>
+                                    <select class="form-select" id="bloco" required>
+                                        <option value="" selected disabled>Selecione o bloco</option>
+                                        <option value="1">Bloco 1</option>
+                                        <option value="2">Bloco 2</option>
+                                        <option value="3">Bloco 3</option>
+                                        <option value="4">Bloco 4</option>
+                                        <option value="5">Bloco 5</option>
+                                        <option value="6">Bloco 6</option>
+                                        <option value="7">Bloco 7</option>
+                                        <option value="8">Bloco 8</option>
+                                        <option value="9">Bloco 9</option>
+                                        <option value="10">Bloco 10</option>
+                                        <option value="11">Bloco 11</option>
+                                        <option value="12">Bloco 12</option>
+                                        <option value="13">Bloco 13</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="apartamento" class="form-label">Apartamento</label>
+                                    <input type="text" class="form-control" id="apartamento" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="tipo" class="form-label">Tipo de Pedido</label>
+                                <select class="form-select" id="tipo" required>
+                                    <option value="" selected disabled>Selecione o tipo</option>
+                                    <option value="Sugestão">Sugestão</option>
+                                    <option value="Manutenção">Manutenção</option>
+                                    <option value="Reclamação">Reclamação</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="descricao" class="form-label">Descrição</label>
+                                <textarea class="form-control" id="descricao" rows="4" required></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save me-1"></i> Salvar Pedido
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Login -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Acesso do Administrador</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formLogin">
+                        <div class="mb-3">
+                            <label for="senha" class="form-label">Senha de Administrador</label>
+                            <input type="password" class="form-control" id="senha" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Entrar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Conclusão -->
+    <div class="modal fade" id="conclusaoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Concluir Pedido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formConclusao">
+                        <input type="hidden" id="pedidoId">
+                        <div class="mb-3">
+                            <label for="conclusao" class="form-label">Descrição da Conclusão</label>
+                            <textarea class="form-control" id="conclusao" rows="4" required></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">Confirmar Conclusão</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="exclusaoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir este pedido?</p>
+                    <p>Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmarExclusao">Confirmar Exclusão</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-5 py-3 text-center">
+        <div class="container">
+            <p class="mb-0">PREV+ - Desenvolvido por Wagner Moreira</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
